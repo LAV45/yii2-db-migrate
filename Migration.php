@@ -10,8 +10,9 @@ namespace lav45\db;
 
 /**
  * Class Migration
+ * @package lav45\db
  */
-abstract Class Migration extends \yii\db\Migration
+abstract Class Migration extends BaseMigration
 {
     /**
      * @var array Списак таблиц которые необхадимо установить
@@ -76,8 +77,7 @@ abstract Class Migration extends \yii\db\Migration
     public function addForeignKey($table, $columns, $refTable, $refColumns, $delete = null, $update = null)
     {
         $this->dependency([$refTable]);
-        $name = $table . '_' . (is_array($columns) ? implode('_', $columns) : $columns) . '_fkey';
-        parent::addForeignKey($name, $table, $columns, $refTable, $refColumns, $delete, $update);
+        parent::addForeignKey($table, $columns, $refTable, $refColumns, $delete, $update);
     }
 
     /**
@@ -124,20 +124,4 @@ abstract Class Migration extends \yii\db\Migration
         return $this->foreign_tables;
     }
 
-    public function addPrimaryKey($table, $columns)
-    {
-        $name = $table . '_pk';
-        parent::addPrimaryKey($name, $table, $columns);
-    }
-
-    public function createIndex($table, $columns, $unique = false)
-    {
-        $name = $table . '_' . (is_array($columns) ? implode('_', $columns) : $columns) . '_idx';
-        parent::createIndex($name, $table, $columns, $unique);
-    }
-
-    public function resetSequence($table, $id)
-    {
-        $this->db->createCommand($this->db->queryBuilder->resetSequence($table, $id))->execute();
-    }
 }
