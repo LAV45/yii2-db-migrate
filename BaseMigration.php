@@ -17,12 +17,33 @@ use yii\db\Migration;
 class BaseMigration extends Migration
 {
     /**
+     * @param string $table
+     * @param string|array $columns
+     * @return string
+     */
+    public function getNameForeignKey($table, $columns)
+    {
+        return $table . '_' . (is_array($columns) ? implode('_', $columns) : $columns) . '_fkey';
+    }
+
+    /**
      * @inheritdoc
      */
     public function addForeignKey($table, $columns, $refTable, $refColumns, $delete = null, $update = null)
     {
-        $name = $table . '_' . (is_array($columns) ? implode('_', $columns) : $columns) . '_fkey';
+        $name = $this->getNameForeignKey($table, $columns);
         parent::addForeignKey($name, $table, $columns, $refTable, $refColumns, $delete, $update);
+    }
+
+    /**
+     * @param string $table
+     * @param string|array $columns
+     * @return string
+     */
+    public function dropForeignKey($table, $columns)
+    {
+        $name = $this->getNameForeignKey($table, $columns);
+        parent::dropForeignKey($name, $table);
     }
 
     /**
@@ -35,12 +56,33 @@ class BaseMigration extends Migration
     }
 
     /**
+     * @param string $table
+     * @param string|array $columns
+     * @return string
+     */
+    public function getNameIndex($table, $columns)
+    {
+        return $table . '_' . (is_array($columns) ? implode('_', $columns) : $columns) . '_idx';
+    }
+
+    /**
      * @inheritdoc
      */
     public function createIndex($table, $columns, $unique = false)
     {
-        $name = $table . '_' . (is_array($columns) ? implode('_', $columns) : $columns) . '_idx';
+        $name = $this->getNameIndex($table, $columns);
         parent::createIndex($name, $table, $columns, $unique);
+    }
+
+    /**
+     * @param string $table
+     * @param string|array $columns
+     * @return string
+     */
+    public function dropIndex($table, $columns)
+    {
+        $name = $this->getNameIndex($table, $columns);
+        parent::dropIndex($name, $table);
     }
 
     /**
