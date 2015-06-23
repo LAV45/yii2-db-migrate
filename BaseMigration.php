@@ -21,7 +21,7 @@ class BaseMigration extends Migration
      * @param string|array $columns
      * @return string
      */
-    public function getNameForeignKey($table, $columns)
+    protected function getNameForeignKey($table, $columns)
     {
         return $table . '_' . (is_array($columns) ? implode('_', $columns) : $columns) . '_fkey';
     }
@@ -47,12 +47,30 @@ class BaseMigration extends Migration
     }
 
     /**
+     * @param string $table
+     * @return string
+     */
+    protected function getNamePrimaryKey($table)
+    {
+        return $table . '_pk';
+    }
+
+    /**
      * @inheritdoc
      */
     public function addPrimaryKey($table, $columns)
     {
-        $name = $table . '_pk';
+        $name = $this->getNamePrimaryKey($table);
         parent::addPrimaryKey($name, $table, $columns);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function dropPrimaryKey($table)
+    {
+        $name = $this->getNamePrimaryKey($table);
+        parent::dropPrimaryKey($name, $table);
     }
 
     /**
@@ -60,7 +78,7 @@ class BaseMigration extends Migration
      * @param string|array $columns
      * @return string
      */
-    public function getNameIndex($table, $columns)
+    protected function getNameIndex($table, $columns)
     {
         return $table . '_' . (is_array($columns) ? implode('_', $columns) : $columns) . '_idx';
     }
