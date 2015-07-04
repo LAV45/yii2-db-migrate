@@ -104,10 +104,10 @@ class BaseMigration extends Migration
     }
 
     /**
-     * @inheritdoc
+     * @see \yii\db\QueryBuilder::resetSequence()
      */
-    public function resetSequence($table, $id)
+    public function resetSequence($table, $value = null)
     {
-        $this->db->createCommand($this->db->queryBuilder->resetSequence($table, $id))->execute();
+        $this->db->createCommand($this->db->queryBuilder->resetSequence($table, $value))->execute();
     }
 } 
