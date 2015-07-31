@@ -40,7 +40,7 @@ abstract Class Migration extends BaseMigration
     /**
      * @inheritdoc
      */
-    public function up()
+    public function safeUp()
     {
         $this->dependency($this->getTables());
     }
@@ -48,7 +48,7 @@ abstract Class Migration extends BaseMigration
     /**
      * @inheritdoc
      */
-    public function down()
+    public function safeDown()
     {
         foreach ($this->getTables() as $table) {
             if (!isset($this->deleted[$table])) {

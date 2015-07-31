@@ -105,6 +105,9 @@ class BaseMigration extends Migration
 
     /**
      * @see \yii\db\QueryBuilder::resetSequence()
+     *
+     * @param string $table the name of the table whose primary key sequence will be reset
+     * @param array|string $value the value for the primary key of the next new row inserted. If this is not set,
      */
     public function resetSequence($table, $value = null)
     {
