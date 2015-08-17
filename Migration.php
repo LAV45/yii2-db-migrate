@@ -61,7 +61,7 @@ abstract Class Migration extends BaseMigration
      * Праверка зависимостей для каректной установки FOREIGN KEY
      * @param array $tables
      */
-    private function dependency($tables)
+    protected function dependency($tables)
     {
         foreach ((array)$tables as $table) {
             if (!isset($this->installed[$table])) {
