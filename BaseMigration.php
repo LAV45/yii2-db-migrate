@@ -16,6 +16,14 @@ use yii\db\Migration;
  */
 class BaseMigration extends Migration
 {
+    protected function normalizeName($table, $columns = null)
+    {
+        $result = preg_replace('/[%\{\}\[\]]+/', '', $table);
+        if ($columns !== null) {
+            $result .= '_' . (is_array($columns) ? implode('_', $columns) : $columns);
+        }
+        return $result;
+    }
     /**
      * @param string $table
      * @param string|array $columns
@@ -23,7 +31,7 @@ class BaseMigration extends Migration
      */
     protected function getNameForeignKey($table, $columns)
     {
-        return $table . '_' . (is_array($columns) ? implode('_', $columns) : $columns) . '_fkey';
+        return $this->normalizeName($table, $columns) . '_fkey';
     }
 
     /**
@@ -52,7 +60,7 @@ class BaseMigration extends Migration
      */
     protected function getNamePrimaryKey($table)
     {
-        return $table . '_pk';
+        return $this->normalizeName($table) . '_pk';
     }
 
     /**
@@ -80,7 +88,7 @@ class BaseMigration extends Migration
      */
     protected function getNameIndex($table, $columns)
     {
-        return $table . '_' . (is_array($columns) ? implode('_', $columns) : $columns) . '_idx';
+        return $this->normalizeName($table, $columns) . '_idx';
     }
 
     /**
