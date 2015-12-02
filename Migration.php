@@ -12,63 +12,24 @@ namespace lav45\db;
  * Class Migration
  * @package lav45\db
  */
-abstract Class Migration extends BaseMigration
+class Migration extends \yii\db\Migration
 {
-    /**
-     * @var array Списак таблиц которые необхадимо установить
-     * Имя функции и итя таблицы должны совпадать
-     */
-    abstract public function getTables();
-
-    /**
-     * @var array список установленных таблиц
-     * Используется в процессе создания таблиц
-     */
-    private $installed = [];
-
-    /**
-     * @var array список удаленных таблиц
-     * Используется в процессе уделения таблиц
-     */
-    private $deleted = [];
-
-    /**
-     * @var array список связанных таблиц
-     */
-    protected $foreign_tables;
-
-    /**
-     * @inheritdoc
-     */
-    public function safeUp()
+    protected function normalizeName($table, $columns = null)
     {
-        $this->dependency($this->getTables());
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function safeDown()
-    {
-        foreach ($this->getTables() as $table) {
-            if (!isset($this->deleted[$table])) {
-                $this->dropTable($table);
-            }
+        $result = preg_replace('/[%\{\}\[\]]+/', '', $table);
+        if ($columns !== null) {
+            $result .= '_' . (is_array($columns) ? implode('_', $columns) : $columns);
         }
+        return $result;
     }
-
     /**
-     * Праверка зависимостей для каректной установки FOREIGN KEY
-     * @param array $tables
+     * @param string $table
+     * @param string|array $columns
+     * @return string
      */
-    protected function dependency($tables)
+    protected function getNameForeignKey($table, $columns)
     {
-        foreach ((array)$tables as $table) {
-            if (!isset($this->installed[$table])) {
-                $this->installed[$table] = true;
-                $this->$table();
-            }
-        }
+        return $this->normalizeName($table, $columns) . '_fkey';
     }
 
     /**
@@ -76,52 +37,86 @@ abstract Class Migration extends BaseMigration
      */
     public function addForeignKey($table, $columns, $refTable, $refColumns, $delete = null, $update = null)
     {
-        $this->dependency([$refTable]);
-        parent::addForeignKey($table, $columns, $refTable, $refColumns, $delete, $update);
+        $name = $this->getNameForeignKey($table, $columns);
+        parent::addForeignKey($name, $table, $columns, $refTable, $refColumns, $delete, $update);
+    }
+
+    /**
+     * @param string $table
+     * @param string|array $columns
+     * @return string
+     */
+    public function dropForeignKey($table, $columns)
+    {
+        $name = $this->getNameForeignKey($table, $columns);
+        parent::dropForeignKey($name, $table);
+    }
+
+    /**
+     * @param string $table
+     * @return string
+     */
+    protected function getNamePrimaryKey($table)
+    {
+        return $this->normalizeName($table) . '_pk';
     }
 
     /**
      * @inheritdoc
      */
-    public function dropTable($table)
+    public function addPrimaryKey($table, $columns)
     {
-        if (!isset($this->deleted[$table])) {
-            if (isset($this->getForeignTables()[$table])) {
-                foreach ($this->getForeignTables()[$table] as $foreign_table) {
-                    $this->dropTable($foreign_table);
-                }
-                parent::dropTable($table);
-            }
-            $this->deleted[$table] = true;
-        }
+        $name = $this->getNamePrimaryKey($table);
+        parent::addPrimaryKey($name, $table, $columns);
     }
 
-    public function getForeignTables()
+    /**
+     * @inheritdoc
+     */
+    public function dropPrimaryKey($table)
     {
-        if ($this->foreign_tables === null) {
-
-            $tables = [];
-            $schema = $this->db->getSchema();
-
-            foreach ($this->getTables() as $name) {
-                if (($table = $schema->getTableSchema($name, true)) !== null) {
-                    if (!isset($tables[$table->fullName])) {
-                        $tables[$table->fullName] = [];
-                    }
-                    if (empty($table->foreignKeys)) {
-                        continue;
-                    }
-                    foreach ($table->foreignKeys as $foreign_table) {
-                        if ($foreign_table[0] !== $table->fullName) {
-                            $tables[$foreign_table[0]][] = $table->fullName;
-                        }
-                    }
-                }
-            }
-            $this->foreign_tables = $tables;
-        }
-
-        return $this->foreign_tables;
+        $name = $this->getNamePrimaryKey($table);
+        parent::dropPrimaryKey($name, $table);
     }
 
-}
+    /**
+     * @param string $table
+     * @param string|array $columns
+     * @return string
+     */
+    protected function getNameIndex($table, $columns)
+    {
+        return $this->normalizeName($table, $columns) . '_idx';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function createIndex($table, $columns, $unique = false)
+    {
+        $name = $this->getNameIndex($table, $columns);
+        parent::createIndex($name, $table, $columns, $unique);
+    }
+
+    /**
+     * @param string $table
+     * @param string|array $columns
+     * @return string
+     */
+    public function dropIndex($table, $columns)
+    {
+        $name = $this->getNameIndex($table, $columns);
+        parent::dropIndex($name, $table);
+    }
+
+    /**
+     * @see \yii\db\QueryBuilder::resetSequence()
+     *
+     * @param string $table the name of the table whose primary key sequence will be reset
+     * @param array|string $value the value for the primary key of the next new row inserted. If this is not set,
+     */
+    public function resetSequence($table, $value = null)
+    {
+        $this->db->createCommand($this->db->queryBuilder->resetSequence($table, $value))->execute();
+    }
+} 
