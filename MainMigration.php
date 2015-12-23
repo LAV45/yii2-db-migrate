@@ -53,7 +53,7 @@ class MainMigration extends Migration
     public function safeDown()
     {
         foreach ($this->getTables() as $table) {
-            if (!isset($this->_deleted[$table])) {
+            if (empty($this->_deleted[$table])) {
                 $this->dropTable($table);
             }
         }
@@ -66,7 +66,7 @@ class MainMigration extends Migration
     protected function dependency($tables)
     {
         foreach ((array) $tables as $table) {
-            if (!isset($this->_installed[$table])) {
+            if (empty($this->_installed[$table])) {
                 $this->_installed[$table] = true;
                 $this->$table();
             }
@@ -87,45 +87,33 @@ class MainMigration extends Migration
      */
     public function dropTable($table)
     {
-        if (!isset($this->_deleted[$table])) {
-            if (isset($this->getForeignTables()[$table])) {
-                foreach ($this->getForeignTables()[$table] as $foreign_table) {
-                    $this->dropTable($foreign_table);
-                }
-                parent::dropTable($table);
+        if (empty($this->_deleted[$table])) {
+            foreach ($this->getForeignTables($table) as $foreign_table) {
+                $this->dropTable($foreign_table);
             }
+            parent::dropTable($table);
             $this->_deleted[$table] = true;
         }
     }
 
     /**
+     * @param string $name
      * @return array
      */
-    public function getForeignTables()
+    public function getForeignTables($name)
     {
         if ($this->_foreign_tables === null) {
-
             $tables = [];
-            $schema = $this->db->getSchema();
-
-            foreach ($this->getTables() as $name) {
-                if (($table = $schema->getTableSchema($name, true)) !== null) {
-                    if (!isset($tables[$table->fullName])) {
-                        $tables[$table->fullName] = [];
-                    }
-                    if (empty($table->foreignKeys)) {
-                        continue;
-                    }
-                    foreach ($table->foreignKeys as $foreign_table) {
-                        if ($foreign_table[0] !== $table->fullName) {
-                            $tables[$foreign_table[0]][] = $table->fullName;
-                        }
+            foreach ($this->db->getSchema()->getTableSchemas() as $table) {
+                foreach ($table->foreignKeys as $foreign_table) {
+                    if ($foreign_table[0] !== $table->fullName && empty($tables[$foreign_table[0]][$table->fullName])) {
+                        $tables[$foreign_table[0]][$table->fullName] = $table->fullName;
                     }
                 }
             }
             $this->_foreign_tables = $tables;
         }
 
-        return $this->_foreign_tables;
+        return isset($this->_foreign_tables[$name]) ? $this->_foreign_tables[$name] : [];
     }
 }
