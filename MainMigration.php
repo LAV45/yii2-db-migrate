@@ -24,8 +24,8 @@ class MainMigration extends Migration
      */
     private $_installed = [];
     /**
-     * @var array список удаленных таблиц
-     * Используется в процессе уделения таблиц
+     * @var array список удалённых таблиц
+     * Используется в процессе удаления таблиц
      */
     private $_deleted = [];
 
@@ -60,7 +60,7 @@ class MainMigration extends Migration
     }
 
     /**
-     * Праверка зависимостей для каректной установки FOREIGN KEY
+     * Проверка зависимостей для корректной установки FOREIGN KEY
      * @param array|string $tables
      */
     protected function dependency($tables)
@@ -76,10 +76,10 @@ class MainMigration extends Migration
     /**
      * @inheritdoc
      */
-    public function addForeignKey($table, $columns, $refTable, $refColumns, $delete = null, $update = null)
+    public function addForeignKey($table, $columns, $refTable, $refColumns, $delete = null, $update = null, $name = null)
     {
         $this->dependency([$refTable]);
-        parent::addForeignKey($table, $columns, $refTable, $refColumns, $delete, $update);
+        parent::addForeignKey($table, $columns, $refTable, $refColumns, $delete, $update, $name);
     }
 
     /**
