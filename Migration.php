@@ -44,7 +44,7 @@ class Migration extends \yii\db\Migration
      * @param string $update the ON UPDATE option. Most DBMS support these options: RESTRICT, CASCADE, NO ACTION, SET DEFAULT, SET NULL
      * @param string $name the name of the foreign key constraint.
      */
-    public function addForeignKey($table, $columns, $refTable, $refColumns, $delete = null, $update = null, $name = null)
+    public function addForeignKey($table, $columns, $refTable, $refColumns, $delete = 'CASCADE', $update = 'CASCADE', $name = null)
     {
         $name = $name ?: $this->getNameForeignKey($table, $columns);
         parent::addForeignKey($name, $table, $columns, $refTable, $refColumns, $delete, $update);
