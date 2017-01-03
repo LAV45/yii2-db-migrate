@@ -76,7 +76,7 @@ class MainMigration extends Migration
     /**
      * @inheritdoc
      */
-    public function addForeignKey($table, $columns, $refTable, $refColumns, $delete = null, $update = null, $name = null)
+    public function addForeignKey($table, $columns, $refTable, $refColumns, $delete = 'CASCADE', $update = 'CASCADE', $name = null)
     {
         $this->dependency([$refTable]);
         parent::addForeignKey($table, $columns, $refTable, $refColumns, $delete, $update, $name);
