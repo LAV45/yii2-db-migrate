@@ -14,13 +14,21 @@ namespace lav45\db;
  */
 class Migration extends \yii\db\Migration
 {
+    /**
+     * @param string $table
+     * @param null|string|string[] $columns
+     * @return string
+     */
     protected function normalizeName($table, $columns = null)
     {
-        $result = preg_replace('/[%\{\}\[\]]+/', '', $table);
-        if ($columns !== null) {
-            $result .= '_' . (is_array($columns) ? implode('_', $columns) : $columns);
-        }
-        return $result;
+        $attributes = empty($columns) ? [] : (array)$columns;
+        array_unshift($attributes, $table);
+        $attributes = array_map(function ($val) {
+            $items = preg_split('~[^\w]+~', $val, null, PREG_SPLIT_NO_EMPTY);
+            return implode('_', $items);
+        }, $attributes);
+
+        return implode('_', $attributes);
     }
     
     /**
