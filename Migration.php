@@ -28,7 +28,17 @@ class Migration extends \yii\db\Migration
             return implode('_', $items);
         }, $attributes);
 
-        return implode('_', $attributes);
+        $result = implode('_', $attributes);
+
+        /**
+         * @see http://dev.mysql.com/doc/refman/5.5/en/identifiers.html
+         * @see https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
+         */
+        if (strlen($result) > 64) {
+            $result = md5($result);
+        }
+
+        return $result;
     }
     
     /**
