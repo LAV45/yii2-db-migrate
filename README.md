@@ -8,17 +8,7 @@ use lav45\db\MainMigration;
 
 class m000000_000000_init extends MainMigration
 {
-    public function getTables()
-    {
-        return [
-            'news',
-            'news_tag',
-            'tag',
-            'user',
-        ];
-    }
-
-    public function news()
+    public function table_news()
     {
         $this->createTable('news', [
             'id' => $this->primaryKey(),
@@ -26,10 +16,10 @@ class m000000_000000_init extends MainMigration
             // ...
         ]);
         
-        $this->addForeignKey('news', 'author_id', 'user', 'id', 'SET NULL', 'CASCADE');
+        $this->addForeignKey('news', 'author_id', 'user', 'id', 'SET NULL');
     }
     
-    public function news_tag()
+    public function table_news_tag()
     {
         $this->createTable('news_tag', [
             'news_id' => $this->integer()->notNull(),
@@ -38,11 +28,11 @@ class m000000_000000_init extends MainMigration
 
         $this->addPrimaryKey('news_tag', ['news_id', 'tag_id']);
 
-        $this->addForeignKey('news_tag', 'news_id', 'news', 'id', 'CASCADE', 'CASCADE');
-        $this->addForeignKey('news_tag', 'tag_id', 'tag', 'id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('news_tag', 'news_id', 'news', 'id');
+        $this->addForeignKey('news_tag', 'tag_id', 'tag', 'id');
     }
 
-    public function tag()
+    public function table_tag()
     {
         $this->createTable('tag', [
             'id' => $this->primaryKey(),
@@ -50,7 +40,7 @@ class m000000_000000_init extends MainMigration
         ]);
     }
 
-    public function user()
+    public function table_user()
     {
         $this->createTable('user', [
             'id' => $this->primaryKey(),

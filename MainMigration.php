@@ -8,6 +8,9 @@
 
 namespace lav45\db;
 
+use ReflectionClass;
+use ReflectionMethod;
+
 /**
  * Class MainMigration
  * @package lav45\db
@@ -28,6 +31,10 @@ class MainMigration extends Migration
      * Используется в процессе удаления таблиц
      */
     private $_deleted = [];
+    /**
+     * @var string
+     */
+    public $methodPrefix = 'table_';
 
     /**
      * Список таблиц которые необходимо установить
@@ -36,7 +43,18 @@ class MainMigration extends Migration
      */
     public function getTables()
     {
-        return [];
+        $tables = [];
+        $len = strlen($this->methodPrefix);
+        $methods = (new ReflectionClass($this))
+            ->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
+
+        foreach ($methods as $method) {
+            if (substr($method->name, 0, $len) == $this->methodPrefix) {
+                $tables[] = substr($method->name, $len);
+            }
+        }
+
+        return $tables;
     }
 
     /**
@@ -65,7 +83,8 @@ class MainMigration extends Migration
      */
     protected function dependency($tables)
     {
-        foreach ((array) $tables as $table) {
+        foreach ($tables as $table) {
+            $table = $this->methodPrefix . $table;
             if (empty($this->_installed[$table])) {
                 $this->_installed[$table] = true;
                 $this->$table();
