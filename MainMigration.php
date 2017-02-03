@@ -88,23 +88,29 @@ class MainMigration extends Migration
     public function dropTable($table)
     {
         if (empty($this->_deleted[$table])) {
-            foreach ($this->getForeignTables($table) as $foreign_table) {
-                $this->dropTable($foreign_table);
+            $foreign_tables = $this->getForeignTables($table);
+            if (is_array($foreign_tables)) {
+                foreach ($foreign_tables as $foreign_table) {
+                    $this->dropTable($foreign_table);
+                }
+                parent::dropTable($table);
             }
-            parent::dropTable($table);
             $this->_deleted[$table] = true;
         }
     }
 
     /**
      * @param string $name
-     * @return array
+     * @return array|null
      */
     public function getForeignTables($name)
     {
         if ($this->_foreign_tables === null) {
             $tables = [];
             foreach ($this->db->getSchema()->getTableSchemas() as $table) {
+                if (!isset($tables[$table->fullName])) {
+                    $tables[$table->fullName] = [];
+                }
                 foreach ($table->foreignKeys as $foreign_table) {
                     if ($foreign_table[0] !== $table->fullName && empty($tables[$foreign_table[0]][$table->fullName])) {
                         $tables[$foreign_table[0]][$table->fullName] = $table->fullName;
@@ -114,6 +120,10 @@ class MainMigration extends Migration
             $this->_foreign_tables = $tables;
         }
 
-        return isset($this->_foreign_tables[$name]) ? $this->_foreign_tables[$name] : [];
+        if (isset($this->_foreign_tables[$name])) {
+            return $this->_foreign_tables[$name];
+        } else {
+            return null;
+        }
     }
 }
