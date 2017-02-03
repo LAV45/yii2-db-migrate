@@ -20,17 +20,17 @@ class MainMigration extends Migration
     /**
      * @var array список связанных таблиц
      */
-    private $_foreign_tables;
+    private $foreign_tables;
     /**
      * @var array список установленных таблиц
      * Используется в процессе создания таблиц
      */
-    private $_installed = [];
+    private $installed = [];
     /**
      * @var array список удалённых таблиц
      * Используется в процессе удаления таблиц
      */
-    private $_deleted = [];
+    private $deleted = [];
     /**
      * @var string
      */
@@ -41,7 +41,7 @@ class MainMigration extends Migration
      * Имя метода в классе и имя таблицы должны совпадать
      * @return array
      */
-    public function getTables()
+    protected function getTables()
     {
         $tables = [];
         $len = strlen($this->methodPrefix);
@@ -71,7 +71,7 @@ class MainMigration extends Migration
     public function safeDown()
     {
         foreach ($this->getTables() as $table) {
-            if (empty($this->_deleted[$table])) {
+            if (empty($this->deleted[$table])) {
                 $this->dropTable($table);
             }
         }
@@ -81,12 +81,12 @@ class MainMigration extends Migration
      * Проверка зависимостей для корректной установки FOREIGN KEY
      * @param array|string $tables
      */
-    protected function dependency($tables)
+    private function dependency($tables)
     {
         foreach ($tables as $table) {
             $table = $this->methodPrefix . $table;
-            if (empty($this->_installed[$table])) {
-                $this->_installed[$table] = true;
+            if (empty($this->installed[$table])) {
+                $this->installed[$table] = true;
                 $this->$table();
             }
         }
@@ -106,7 +106,7 @@ class MainMigration extends Migration
      */
     public function dropTable($table)
     {
-        if (empty($this->_deleted[$table])) {
+        if (empty($this->deleted[$table])) {
             $foreign_tables = $this->getForeignTables($table);
             if (is_array($foreign_tables)) {
                 foreach ($foreign_tables as $foreign_table) {
@@ -114,7 +114,7 @@ class MainMigration extends Migration
                 }
                 parent::dropTable($table);
             }
-            $this->_deleted[$table] = true;
+            $this->deleted[$table] = true;
         }
     }
 
@@ -122,9 +122,9 @@ class MainMigration extends Migration
      * @param string $name
      * @return array|null
      */
-    public function getForeignTables($name)
+    private function getForeignTables($name)
     {
-        if ($this->_foreign_tables === null) {
+        if ($this->foreign_tables === null) {
             $tables = [];
             foreach ($this->db->getSchema()->getTableSchemas() as $table) {
                 if (!isset($tables[$table->fullName])) {
@@ -136,11 +136,11 @@ class MainMigration extends Migration
                     }
                 }
             }
-            $this->_foreign_tables = $tables;
+            $this->foreign_tables = $tables;
         }
 
-        if (isset($this->_foreign_tables[$name])) {
-            return $this->_foreign_tables[$name];
+        if (isset($this->foreign_tables[$name])) {
+            return $this->foreign_tables[$name];
         } else {
             return null;
         }
