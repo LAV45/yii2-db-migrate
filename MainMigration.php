@@ -33,6 +33,7 @@ class MainMigration extends Migration
     private $deleted = [];
     /**
      * @var string
+     * @since 0.4.1
      */
     public $methodPrefix = 'table_';
 
@@ -84,7 +85,9 @@ class MainMigration extends Migration
     private function dependency($tables)
     {
         foreach ($tables as $table) {
-            $table = $this->methodPrefix . $table;
+            if (method_exists($this, $this->methodPrefix . $table)) {
+                $table = $this->methodPrefix . $table;
+            }
             if (empty($this->installed[$table])) {
                 $this->installed[$table] = true;
                 $this->$table();
