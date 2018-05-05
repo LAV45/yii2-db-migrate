@@ -3,6 +3,15 @@ yii2-db-migrate
 
 Это расширение поможет вам избежать конфликтов в вашей SQL db при создании foreign key.
 
+
+## Установка расширения
+
+```bash
+~$ composer require --prefer-dist lav45/yii2-db-migrate
+```
+
+## Подключение
+
 ```php
 use lav45\db\MainMigration;
 
