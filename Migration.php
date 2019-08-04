@@ -15,6 +15,11 @@ namespace lav45\db;
 class Migration extends \yii\db\Migration
 {
     /**
+     * @var string Default options for creating a table. Use in [[createTable]] method
+     */
+    public $defaultTableOptions;
+
+    /**
      * @param string $table
      * @param null|string|string[] $columns
      * @return string
@@ -40,7 +45,7 @@ class Migration extends \yii\db\Migration
 
         return $result;
     }
-    
+
     /**
      * @param string $table
      * @param string|array $columns
@@ -159,5 +164,26 @@ class Migration extends \yii\db\Migration
     public function resetSequence($table, $value = null)
     {
         $this->db->createCommand($this->db->queryBuilder->resetSequence($table, $value))->execute();
+    }
+
+    /**
+     * Builds and executes a SQL statement for creating a new DB table.
+     *
+     * The columns in the new  table should be specified as name-definition pairs (e.g. 'name' => 'string'),
+     * where name stands for a column name which will be properly quoted by the method, and definition
+     * stands for the column type which can contain an abstract DB type.
+     *
+     * The [[QueryBuilder::getColumnType()]] method will be invoked to convert any abstract type into a physical one.
+     *
+     * If a column is specified with definition only (e.g. 'PRIMARY KEY (name, type)'), it will be directly
+     * put into the generated SQL.
+     *
+     * @param string $table the name of the table to be created. The name will be properly quoted by the method.
+     * @param array $columns the columns (name => definition) in the new table.
+     * @param string $options additional SQL fragment that will be appended to the generated SQL.
+     */
+    public function createTable($table, $columns, $options = null)
+    {
+        parent::createTable($table, $columns, $options ?: $this->defaultTableOptions);
     }
 } 

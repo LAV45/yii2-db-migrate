@@ -17,6 +17,9 @@ use lav45\db\MainMigration;
 
 class m000000_000000_init extends MainMigration
 {
+    // http://stackoverflow.com/questions/766809/whats-the-difference-between-utf8-general-ci-and-utf8-unicode-ci
+    public $defaultTableOptions = 'CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE=InnoDB';
+
     public function table_news()
     {
         $this->createTable('news', [

@@ -50,7 +50,7 @@ class MainMigration extends Migration
             ->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
 
         foreach ($methods as $method) {
-            if (substr($method->name, 0, $len) == $this->methodPrefix) {
+            if (strpos($method->name, $this->methodPrefix) === 0) {
                 $tables[] = substr($method->name, $len);
             }
         }
@@ -144,8 +144,7 @@ class MainMigration extends Migration
 
         if (isset($this->foreign_tables[$name])) {
             return $this->foreign_tables[$name];
-        } else {
-            return null;
         }
+        return null;
     }
 }
