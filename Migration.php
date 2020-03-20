@@ -163,7 +163,10 @@ class Migration extends \yii\db\Migration
      */
     public function resetSequence($table, $value = null)
     {
-        $this->db->createCommand($this->db->queryBuilder->resetSequence($table, $value))->execute();
+        $time = $this->beginCommand("reset sequence {$table}");
+        $sql = $this->db->queryBuilder->resetSequence($table, $value);
+        $this->db->createCommand($sql)->execute();
+        $this->endCommand($time);
     }
 
     /**
@@ -185,5 +188,20 @@ class Migration extends \yii\db\Migration
     public function createTable($table, $columns, $options = null)
     {
         parent::createTable($table, $columns, $options ?: $this->defaultTableOptions);
+    }
+
+    /**
+     * Creates and executes an INSERT SQL statement.
+     * The method will properly escape the column names, and bind the values to be inserted.
+     * @param string $table the table that new rows will be inserted into.
+     * @param array $columns the column data (name => value) to be inserted into the table.
+     * @return array|false primary key values or false if the command fails
+     */
+    public function insert($table, $columns)
+    {
+        $time = $this->beginCommand("insert into {$table}");
+        $result = $this->db->getSchema()->insert($table, $columns);
+        $this->endCommand($time);
+        return $result;
     }
 } 
