@@ -163,6 +163,17 @@ class Migration extends \yii\db\Migration
      */
     public function resetSequence($table, $value = null)
     {
+        $tableSchema = $this->db->getSchema()->getTableSchema($table);
+        $primaryKey = $tableSchema->primaryKey;
+        if (count($primaryKey) > 1) {
+            return;
+        }
+        /** @var \yii\db\ColumnSchema $primaryKeyColumn */
+        $primaryKeyColumn = $tableSchema->getColumn($primaryKey[0]);
+        if ($primaryKeyColumn->autoIncrement === false) {
+            return;
+        }
+
         $time = $this->beginCommand("reset sequence {$table}");
         $sql = $this->db->queryBuilder->resetSequence($table, $value);
         $this->db->createCommand($sql)->execute();
